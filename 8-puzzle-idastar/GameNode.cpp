@@ -38,6 +38,7 @@ public:
     long long id;
 
     GameNode(int size, int **board);
+    ~GameNode();
     GameNode * getNeighbour(Direction direction);
     int **boardCopy();
     int *flattenBoard();
@@ -60,6 +61,14 @@ GameNode::GameNode(int size, int **board) : size(size), board(board), id(0)
             id = ((id << 4) | (this->board[i][j] & mask));
         }
     }
+}
+
+GameNode::~GameNode() {
+    for (int i = 0; i < this->size; i++)
+    {
+        delete [] this->board[i];
+    }
+    delete [] this->board;
 }
 
 GameNode *GameNode::getNeighbour(Direction direction)
