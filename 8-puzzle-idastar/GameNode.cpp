@@ -127,7 +127,6 @@ int GameNode::manhattan() {
             int boardValue = this->board[i][j] == 0 ? this->size * this->size : this->board[i][j];
             int x = (boardValue - 1) / this->size, y = (boardValue - 1) % this->size; 
             sum += abs(x-i) + abs(y-j);
-            // std::cout << "sum: " << sum << std::endl;
         }
     }
     return sum;
