@@ -1,10 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <queue>
-#include <stack>
-#include <functional>
 #include <limits>
+#include <unordered_set>
 #include "GameNode.cpp"
 
 class Solver
@@ -14,12 +12,13 @@ private:
     int goalPostion;
     GameNode *initialState;
     GameNode *goal;
-    std::vector<char *> path;
+    std::vector<const char *> path;
 
     void readInitialState();
     void setGoalState();
-    int search(GameNode *node, int g, int threshhold, std::vector<GameNode *> &visited);
-    bool isVisited(GameNode *node, std::vector<GameNode *> &visited);
+    int search(GameNode *node, int g, int threshhold, std::unordered_set<long long> &visited);
+    bool isVisited(GameNode *node, std::unordered_set<long long> &visited);
+    void printPath();
 
 public:
     Solver();
@@ -53,8 +52,9 @@ void Solver::readInitialState()
     this->initialState = new GameNode(this->boardSize, tmpBoard);
 }
 
-void Solver::setGoalState() {
-    int **goalBoard = new int*[this->boardSize];
+void Solver::setGoalState()
+{
+    int **goalBoard = new int *[this->boardSize];
     for (size_t i = 0; i < this->boardSize; i++)
     {
         goalBoard[i] = new int[this->boardSize];
@@ -65,46 +65,41 @@ void Solver::setGoalState() {
     }
     goalBoard[this->boardSize - 1][this->boardSize - 1] = 0;
     this->goal = new GameNode(this->boardSize, goalBoard);
-
-    std::cout << std::endl;
-    std::cout << this->boardSize << std::endl;
-    this->goal->printState();
-    std::cout << std::endl;
-    std::cout << "manhattan: " << this->initialState->manhattan() << std::endl;
-    // 5 + 4 + 4 + 4 + 3 + 3 + 3 + 2 + 3 + 1 + 3 + 2 + 3 + 4 + 2 + 4
 }
 
 void Solver::solve()
 {
-    if (this->initialState->isSolvable()) {
+    if (!this->initialState->isSolvable())
+    {
         std::cout << "not solvable" << std::endl;
+        return;
     }
     int threshhold = initialState->manhattan();
     this->path.clear();
-    for (;;) {
-    // for(int i = 0; i < 1; i++) {
-        std::vector<GameNode *> visited;
+    for (;;)
+    {
+        std::unordered_set<long long> visited;
         int newThreshhold = search(initialState, 0, threshhold, visited);
-        if (newThreshhold == -1) {
+        if (newThreshhold == -1)
+        {
+            this->printPath();
             return;
         }
-        std::cout << "new threshhold: " << newThreshhold << std::endl; 
-        threshhold = newThreshhold;   
+        // std::cout << "new threshhold: " << newThreshhold << std::endl;
+        threshhold = newThreshhold;
     }
 }
 
-int Solver::search(GameNode *node, int g, int threshhold, std::vector<GameNode *> &visited) {
-    visited.push_back(node);
+int Solver::search(GameNode *node, int g, int threshhold, std::unordered_set<long long> &visited)
+{
+    visited.insert(node->id);
     int f = g + node->manhattan();
-    
-    // std::cout << "depth: " << g << std::endl;
-    // std::cout << "threshhold: " << threshhold << " vs f " << f << std::endl;
-    
-    if (*node == *(this->goal)) {
-        std::cout << "found" << std::endl;
+    if (*node == *(this->goal))
+    {
         return -1;
     }
-    if (f > threshhold) {
+    if (f > threshhold)
+    {
         return f;
     }
 
@@ -112,16 +107,17 @@ int Solver::search(GameNode *node, int g, int threshhold, std::vector<GameNode *
     std::vector<Direction> directions({Left, Right, Up, Down});
     for (auto direction : directions)
     {
-        GameNode * child = node->getNeighbour(direction);
-        if (child != nullptr && !this->isVisited(child, visited)) {
-            // child->printState();
-          
+        GameNode *child = node->getNeighbour(direction);
+        if (child != nullptr && !this->isVisited(child, visited))
+        {
             int childF = this->search(child, g + 1, threshhold, visited);
-            if (childF == -1) {
-                getDirection(direction);
+            if (childF == -1)
+            {
+                this->path.push_back(getDirection(direction));
                 return -1;
             }
-            if (childF < min) {
+            if (childF < min)
+            {
                 min = childF;
             }
         }
@@ -129,13 +125,24 @@ int Solver::search(GameNode *node, int g, int threshhold, std::vector<GameNode *
     return min;
 }
 
-bool Solver::isVisited(GameNode *node, std::vector<GameNode *> &visited) {
-    for (auto v : visited) {
-        if (*node == *v) {
+bool Solver::isVisited(GameNode *node, std::unordered_set<long long> &visited)
+{
+    for (auto v : visited)
+    {
+        if (node->id == v)
+        {
             return true;
         }
     }
     return false;
+}
+
+void Solver::printPath()
+{
+    for (int i = this->path.size() - 1; i >= 0; i--)
+    {
+        std::cout << this->path[i] << std::endl;
+    }
 }
 
 /*

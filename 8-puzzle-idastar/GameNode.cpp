@@ -2,7 +2,6 @@
 #include <vector>
 #include <utility>
 #include <cmath>
-#include <string>
 
 enum Direction
 {
@@ -26,6 +25,7 @@ const char * getDirection(Direction direction) {
     default:
         break;
     }
+    return nullptr;
 }
 
 class GameNode
@@ -33,9 +33,10 @@ class GameNode
     int **board;
     int size;
     std::pair<int, int> *empty;
-    std::string id;
 
 public:
+    long long id;
+
     GameNode(int size, int **board);
     GameNode * getNeighbour(Direction direction);
     int **boardCopy();
@@ -43,23 +44,11 @@ public:
     int manhattan();
     bool isSolvable();
     bool operator==(GameNode &other);
-
-    void printState()
-    {
-        for (size_t i = 0; i < this->size; i++)
-        {
-            for (size_t j = 0; j < this->size; j++)
-            {
-                std::cout << board[i][j] << " ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-    }
 };
 
-GameNode::GameNode(int size, int **board) : size(size), board(board)
+GameNode::GameNode(int size, int **board) : size(size), board(board), id(0)
 {
+    int mask = 15;
     for (size_t i = 0; i < this->size; i++)
     {
         for (size_t j = 0; j < this->size; j++)
@@ -68,6 +57,7 @@ GameNode::GameNode(int size, int **board) : size(size), board(board)
             {
                 this->empty = new std::pair<int, int>(i, j);
             }
+            id = ((id << 4) | (this->board[i][j] & mask));
         }
     }
 }
@@ -122,7 +112,6 @@ bool GameNode::isSolvable() {
             }
         }
     }
-
     delete [] flatted;
     return this->size % 2
         ? inversions % 2 == 0
@@ -164,7 +153,7 @@ int *GameNode::flattenBoard() {
     {
         for (size_t j = 0; j < this->size; j++)
         {
-            flatted[i * 3 + j] = this->board[i][j];
+            flatted[i * this->size + j] = this->board[i][j];
         }
     }
     return flatted;
