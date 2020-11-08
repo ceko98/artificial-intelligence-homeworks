@@ -127,14 +127,7 @@ int Solver::search(GameNode *node, int g, int threshhold, std::unordered_set<lon
 
 bool Solver::isVisited(GameNode *node, std::unordered_set<long long> &visited)
 {
-    for (auto v : visited)
-    {
-        if (node->id == v)
-        {
-            return true;
-        }
-    }
-    return false;
+    return visited.find(node->id) != visited.end();
 }
 
 void Solver::printPath()
