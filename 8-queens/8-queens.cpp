@@ -2,6 +2,7 @@
 #include <time.h>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 class Board
 {
@@ -14,6 +15,8 @@ private:
 
     int * tmp = nullptr;
     int tmpIndex;
+
+    std::mt19937 rng;
 
 public:
     Board(int size);
@@ -32,7 +35,7 @@ public:
     void clear();
 };
 
-Board::Board(int size) : size(size)
+Board::Board(int size) : size(size), rng(std::random_device{}())
 {
     this->queens = new int[this->size]();
     this->row = new int[this->size]();
@@ -92,7 +95,8 @@ int Board::conflictsFor(int column, int row)
 
 int Board::getRamdomFromTmp()
 {
-    return tmp[rand() % tmpIndex];
+    std::uniform_int_distribution<int> dist(0, tmpIndex - 1);
+    return tmp[dist(rng)];
 }
 
 void Board::printBoard()
@@ -126,7 +130,7 @@ int Board::getMaxConflictQueen()
 
     for (int i = 0; i < this->size; i++)
     {
-        int conflicts = this->conflictsFor(i, queens[i]) - 3;
+        int conflicts = this->conflictsFor(i, queens[i]) - (i == queens[i] ? 3 : 0);
         if (conflicts > maxConflict)
         {
             tmpIndex = 0;
@@ -147,7 +151,7 @@ int Board::getMinQueenConflicts(int column)
 
     for (int i = 0; i < this->size; i++)
     {
-        int conflicts = this->conflictsFor(column, i);
+        int conflicts = this->conflictsFor(column, i) - 3;
         if (conflicts < minConflicts)
         {
             tmpIndex = 0;
@@ -178,11 +182,14 @@ void Board::solve()
     clock_t tStart = clock();
     init();
     int index = 0;
-    while (index++ <= 2 * this->size)
+    while (index++ <= 4 * this->size)
     {
         int column = getMaxConflictQueen();
         if (conflictsFor(column, queens[column]) - 3)
         {
+            if (this->size < 20) {
+                printBoard();
+            }
             printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
             return;
         }
