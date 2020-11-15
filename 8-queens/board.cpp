@@ -28,6 +28,34 @@ public:
     int getMinQueenConflicts(int column);
     void moveQueen(int column, int newRow, int oldRow);
     void solve();
+
+    void printArrays()
+    {
+
+        for (int i = 0; i < this->size; i++)
+        {
+            std::cout << queens[i] << " ";
+        }
+        std::cout << std::endl;
+
+        for (int i = 0; i < this->size; i++)
+        {
+            std::cout << row[i] << " ";
+        }
+        std::cout << std::endl;
+
+        for (int i = 0; i < this->size * 2 - 1; i++)
+        {
+            std::cout << diag1[i] << " ";
+        }
+        std::cout << std::endl;
+
+        for (int i = 0; i < this->size * 2 - 1; i++)
+        {
+            std::cout << diag2[i] << " ";
+        }
+        std::cout << std::endl;
+    }
 };
 
 Board::Board(int size) : size(size)
@@ -48,7 +76,6 @@ Board::Board(int size) : size(size)
         this->diag1[i - queens[i] + this->size - 1]++;
         this->diag2[i + queens[i]]++;
     }
-    printBoard();
 }
 
 int Board::findMinConflict(int column)
@@ -69,7 +96,6 @@ int Board::findMinConflict(int column)
             tmp[tmpIndex++] = i;
         }
     }
-    std::cout << minConflict << std::endl;
     return getRamdomFromTmp();
 }
 
@@ -125,10 +151,6 @@ int Board::getMaxConflictQueen()
             tmp[tmpIndex++] = i;
         }
     }
-    std::cout << "max: " << maxConflict << std::endl;
-    // if (tmpIndex <= 1) {
-    //     return
-    // }
     return getRamdomFromTmp();
 }
 
@@ -139,7 +161,7 @@ int Board::getMinQueenConflicts(int column)
 
     for (int i = 0; i < this->size; i++)
     {
-        int conflicts = this->conflictsFor(column, i) - 3;
+        int conflicts = this->conflictsFor(column, i) - (i == queens[column] ? 3 : 0);
         if (conflicts < minConflicts)
         {
             tmpIndex = 0;
@@ -150,12 +172,6 @@ int Board::getMinQueenConflicts(int column)
             tmp[tmpIndex++] = i;
         }
     }
-    std::cout << "min: " << minConflicts << std::endl;
-    for (int i = 0; i < tmpIndex; i++)
-    {
-        std::cout << tmp[i] << " ";
-    }
-    std::cout << std::endl;
     return getRamdomFromTmp();
 }
 
@@ -179,13 +195,8 @@ void Board::solve()
         int column = getMaxConflictQueen();
         int oldRow = queens[column];
         int newRow = getMinQueenConflicts(column);
-        std::cout << "col: " << column;
-        std::cout << " newRow: " << newRow;
-        std::cout << " oldRow: " << oldRow << std::endl;
         moveQueen(column, newRow, oldRow);
-        printBoard();
     }
-    std::cout << std::endl;
 
     if (hasConflicts())
     {
