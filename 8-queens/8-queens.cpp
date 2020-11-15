@@ -206,10 +206,8 @@ Board::~Board()
 
 int main()
 {
-
     int n;
     std::cin >> n;
-
 
     Board s(n);
     s.solve();
