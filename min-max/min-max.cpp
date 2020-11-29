@@ -5,19 +5,9 @@
 class Board
 {
 private:
-// X X O 
-// _ O _ 
-// _ O _ 
-
-// X O X 
-// _ O X 
-// O _ _
 
 public:
     char board[3][3] = {{'_', '_', '_'}, {'_', '_', '_'}, {'_', '_', '_'}};
-    // char board[3][3] = {{'X', 'O', 'X'}, {'O', 'O', 'X'}, {'_', '_', '_'}};
-    // char board[3][3] = {{'X', 'O', 'X'}, {'O', 'O', 'X'}, {'_', '_', 'X'}};
-    // char board[3][3] = {{'X', 'O', 'X'}, {'_', 'O', '_'}, {'O', '_', '_'}};
 
     Board() {};
     void setPosition(int i, int j, char marker);
@@ -115,11 +105,9 @@ public:
 
 int Game::evalMove(Board board, char player, char perspective)
 {
-    // board.printBoard();
     const char winner = board.winner();
     if (board.winner() != '_')
     {
-        // std::cout << winner << std::endl;
         return winner == 'D' ? 0 : winner == perspective ? 1 : -1;
     }
 
@@ -156,31 +144,22 @@ void Game::play()
 
         playBoard.setPosition(i, j, human);
         playBoard.printBoard();
-        // std::cout << playBoard.winner() << std::endl;
         if (playBoard.winner() != '_')
             return;
 
         int maxMoveValue = -2;
         int maxI = -1, maxJ = -1;
-        int index = 2;
         for (auto cord : playBoard.getFree())
         {
-            // std::vector<int> cord = {1,2};
             Board next(playBoard);
-            // std::cout << cord[0] << cord[1] << std::endl;
             next.setPosition(cord[0], cord[1], ai);
             int moveValue = evalMove(next, human, ai);
-            // std::cout << moveValue << std::endl;
-            // next.printBoard();
             if (moveValue > maxMoveValue)
             {
                 maxMoveValue = moveValue;
                 maxI = cord[0];
                 maxJ = cord[1];
             }
-            index--;
-            // if (index == 0) break;
-            // std::cout << "-------------------\n";
         }
         playBoard.setPosition(maxI, maxJ, ai);
         playBoard.printBoard();
