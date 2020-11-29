@@ -99,11 +99,11 @@ private:
 
 public:
     Game() {};
-    int evalMove(Board board, char player, char perspective);
+    int evalMove(Board board, char player, char perspective, int alpha, int beta);
     void play();
 };
 
-int Game::evalMove(Board board, char player, char perspective)
+int Game::evalMove(Board board, char player, char perspective, int alpha, int beta)
 {
     const char winner = board.winner();
     if (board.winner() != '_')
@@ -118,7 +118,12 @@ int Game::evalMove(Board board, char player, char perspective)
         {
             Board next(board);
             next.setPosition(cord[0], cord[1], player);
-            result = std::max(result, evalMove(next, human, perspective));
+            result = std::max(result, evalMove(next, human, perspective, alpha, beta));
+            alpha = std::max(alpha, result);
+            if (alpha > beta)
+            {
+                break;
+            }
         }
         return result;
     }
@@ -129,7 +134,12 @@ int Game::evalMove(Board board, char player, char perspective)
         {
             Board next(board);
             next.setPosition(cord[0], cord[1], player);
-            result = std::min(result, evalMove(next, ai, perspective));
+            result = std::min(result, evalMove(next, ai, perspective, alpha, beta));
+            beta = std::min(beta, result);
+            if (beta < alpha)
+            {
+                break;
+            }
         }
         return result;
     }
@@ -153,7 +163,7 @@ void Game::play()
         {
             Board next(playBoard);
             next.setPosition(cord[0], cord[1], ai);
-            int moveValue = evalMove(next, human, ai);
+            int moveValue = evalMove(next, human, ai, -2, 2);
             if (moveValue > maxMoveValue)
             {
                 maxMoveValue = moveValue;
