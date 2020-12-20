@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
-#include "utils.cpp"
 
 enum Party
 {
