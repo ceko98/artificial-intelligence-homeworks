@@ -1,3 +1,7 @@
 .vscode/
 **/a.out
 **/*.zip
+**/node_modules
+**/*.gch
+**/build/
+**/yarn.lock
