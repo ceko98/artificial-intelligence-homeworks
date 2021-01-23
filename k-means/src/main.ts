@@ -25,21 +25,31 @@ class Cluserizer {
   readonly NUMBER_OF_CLUSTERS = 8;
   delim = ' ';  // '\t' ot ' '
   filename = 'unbalance.txt';
+  restarts = 50;
   points: Point[] = [];
   clusters: Cluster[] = [];
 
+  currentBest: number = null;
+  bestClusters: Cluster[] = [];
+  
   constructor() {
     this.readData().then(arr => {
       this.points = arr.map(([x, y], i) => ({ x: Number(x), y: Number(y), id: i }) as Point);
-      this.initClusters();
+      this.initPoints();
+      this.randomRestart();
+      // this.initClusters();
     });
   }
 
-  initClusters() {
+  initPoints() {
     this.upper_x = max(this.points.map(p => p.x));
     this.upper_y = max(this.points.map(p => p.y));
     this.lower_x = min(this.points.map(p => p.x));
     this.lower_y = min(this.points.map(p => p.y));
+  }
+
+  initClusters() {
+    this.clusters = [];
     for (let index = 0; index < this.NUMBER_OF_CLUSTERS; index++) {
       const x = Math.random() * (this.upper_x - this.lower_x) + this.lower_x;
       const y = Math.random() * (this.upper_y - this.lower_y) + this.lower_y;
@@ -47,6 +57,15 @@ class Cluserizer {
       this.clusters.push({ center, id: index, points: new Map() });
     }
     this.calcLoop();
+  }
+
+  randomRestart() {
+    for (let index = 0; index < this.restarts; index++) {
+      this.initClusters();
+      console.log(index);
+      
+    }
+    this.drawPic();
   }
 
   pointsCalc() {
@@ -59,11 +78,10 @@ class Cluserizer {
 
   clusterCalc() {
     this.clusters.forEach(c => {
-      // console.log('before',c.center);
-
-      c.center.x = mean(Array.from(c.points.values()).map(p => p.x));
-      c.center.y = mean(Array.from(c.points.values()).map(p => p.y));
-      // console.log('after',c.center);
+      const newX = mean([...c.points.values()].map(p => p.x));
+      const newY = mean([...c.points.values()].map(p => p.y));
+      c.center.x = isNaN(newX) ? c.center.x : newX;
+      c.center.y = isNaN(newY) ? c.center.y : newY;
     });
   }
 
@@ -71,9 +89,6 @@ class Cluserizer {
     let index = 1;
     let lastCenters: Point[] = [];
     while (!this.sameCenters(lastCenters, this.clusters.map(c => c.center))) {
-      console.log('iteration: ', index++);
-      console.log(this.clusters);
-      
       lastCenters = [];
       this.clusters.forEach(c => {
         lastCenters.push(Object.assign({}, c.center));
@@ -81,12 +96,25 @@ class Cluserizer {
       this.clusters.forEach(c => c.points = new Map());
       this.pointsCalc();
       this.clusterCalc();
-
-      console.log(lastCenters);
-      // console.log(this.clusters.map(c => c.center));
+      if (lastCenters.some(p => isNaN(p.x))) { return }
     }
+    const scatter = this.withinPointScatter();
+    if (this.currentBest === null || scatter < this.currentBest) {
+      this.currentBest = scatter;
+      this.bestClusters = this.clusters.map(c => ({ ...c }));
+    }
+    // console.log(this.bestClusters);
+  }
 
-    this.drawPic()
+  withinPointScatter() {
+    return this.clusters.map(({ points, center }) => {
+      const pointss = [...points.values()];
+      if (pointss.length === 0) return 0;
+      return pointss.map(p => {
+        const dist = this.dist(p, center);
+        return dist * dist
+      }).reduce((p, c) => c + p);
+    }).reduce((p, c) => c + p)
   }
 
   sameCenters(oldCenters: Point[], newCenters: Point[]) {
@@ -122,7 +150,7 @@ class Cluserizer {
   }
 
   drawPic() {
-    const datasets = this.clusters.map(c => ({ data: [...c.points.values()].map(({x,y}) => ({x, y, r: 5})) }));
+    const datasets = this.bestClusters.map(c => ({ data: [...c.points.values()].map(({x,y}) => ({x, y, r: 3})) }));
     const myChart = new ChartJsImage();
     const chart = myChart.setConfig({
       type: 'bubble',
