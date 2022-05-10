@@ -186,7 +186,7 @@ void Solver::start()
             lastBest = population[0];
             iterationsWithoutImprovement = 0;
         }
-        if (iterationsWithoutImprovement >= size * 100)
+        if (iterationsWithoutImprovement >= size * 50)
         {
             break;
         }

@@ -22,6 +22,9 @@ class Cluserizer {
   upper_y: number;
   lower_x: number;
   lower_y: number;
+  // readonly NUMBER_OF_CLUSTERS = 4;
+  // delim = '\t';  // '\t' ot ' '
+  // filename = 'normal.txt';
   readonly NUMBER_OF_CLUSTERS = 8;
   delim = ' ';  // '\t' ot ' '
   filename = 'unbalance.txt';
